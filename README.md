@@ -1,6 +1,6 @@
 D3.4.
 
-Задание:
+###Задание:
 
 1. Создать сущность Deployment c тремя репликами веб-сервера;
         
@@ -10,28 +10,34 @@ D3.4.
         
 4. Добавить секрет для создания basic auth аутентификации в nginx.
 
+---
 
-Выполнение:
+###Выполнение:
 
 Был создан файл-манифест depoy-nginx.yaml со следующими свойствами:
 
----
+1. kind: Deployment
 
-kind: Deployment
+- образ - nginx:1.21.1-alpine
 
-образ - nginx:1.21.1-alpine
+- имя - nginx-sf
 
-имя - nginx-sf
+- количество реплик - 3
 
-количество реплик - 3
+- путь до файла конфигурации в Pod-е - /etc/nginx/nginx.conf
 
-путь до файла конфигурации в Pod-е - /etc/nginx/nginx.conf
 
----
+2. kind: Service
 
-kind: ConfigMap
+- имя сервиса sf-webserver
 
-`data:
+- внешний порт - 80
+
+
+3. kind: ConfigMap
+
+```
+data:
   nginx.conf: |
     user nginx;
     worker_processes 1;
@@ -47,19 +53,10 @@ kind: ConfigMap
           index  index.html index.htm;
         }
       }
-    }`
+    }
+```
 
 ---
-
-kind: Service
-
-имя сервиса sf-webserver
-
-внешний порт - 80
-
-
-====================================================================================
-
 
 После команды применения 'kubectl apply -f deploy-nginx.yaml' была произведена проверка работоспособности:
 
@@ -72,32 +69,34 @@ kubectl get pods  #  отобразить Pod-ы
 Проверка поднятия Service выполнялась через команду 'kubectl describe service sf-wevserver'
 
 
-=====================================================================================
+---
 
+4. kind: Secret
 
 Далее для аутентификации в nginx были подготовлены данные для отправки в Pod-ы:
 
-`htpasswd -c myAuth user1
 
-cat myAuth | base64`
+`htpasswd -c myAuth user1`
 
----
+`cat myAuth | base64`
+
 
 Был создан файл secret.yaml с данными для передачи:
 
-`apiVersion: v1
+```
+apiVersion: v1
 kind: Secret
 metadata:
   name: basic-auth
 type: Opaque
 data:
-  user1: dXNlcjE6JGFwcjEkMDJnaGpGSFkkeHB6QkJidW05ejZ0U3k4ZmVSaFFRLgo=`
-
----
+  user1: dXNlcjE6JGFwcjEkMDJnaGpGSFkkeHB6QkJidW05ejZ0U3k4ZmVSaFFRLgo=
+```
 
 В файл deploy-nginx.yaml, в разделе Deployment,  добавлены следующие строки:
 
-`...
+```
+...
 spec:
   ...
   template:
@@ -117,12 +116,13 @@ spec:
           secretName: basic-auth
           items:
           - key: user1
-          path: htpasswd`
-
+          path: htpasswd
+```
 
 В разделе ConfigMap изменено:
 
-`data:
+```
+data:
   nginx.conf: |
     user nginx;
     worker_processes 1;
@@ -140,17 +140,19 @@ spec:
         auth_basic "User Auth";
         auth_basic_user_file conf/htpasswd;
       }
-    }`
+    }
+```
 
-
-=====================================================================================
+---
 
 Применение новой кофигурации через команду 'kubectl apply -f .'
 
 Далее проверка через команды:
 
-`kubectl get pods
 
-kubectl exec -it <nameOfPod> -- curl sf-webserver
+`kubectl get pods`
 
-kubectl exec -it <nameOfPod> -- curl -u user1:password1 sf-webserver`
+`kubectl exec -it <nameOfPod> -- curl sf-webserver`
+
+`kubectl exec -it <nameOfPod> -- curl -u user1:password1 sf-webserver`
+
