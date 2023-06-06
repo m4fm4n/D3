@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-sf
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21.1-alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config
+          mountPath: "/etc/nginx"
+          readOnly: true
+        - name: auth
+          mountPath: "/etc/nginx/conf"
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: nginx-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: auth
+        secret:
+          secretName: basic-auth
+          items:
+          - key: user1
+            path: htpasswd
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes 1;
+    events {
+      worker_connections 10240;
+    }
+    http {
+      server {
+        listen       80;
+        server_name  localhost;
+        location / {
+          root   /usr/share/nginx/html;
+          index  index.html index.htm;
+        }
+        auth_basic "User Auth";
+        auth_basic_user_file conf/htpasswd;
+      }
+    }
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sf-webserver
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
