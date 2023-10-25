@@ -51,25 +51,19 @@ data:
 
 `kubectl get pods`  #  отобразить Pod-ы 
 
-Затем через команду `kubectl exec -it <nameOfPod> -- sh -c 'cat /etc/nginx/nginx.conf'` было осуществлено подключение к терминалу одного из подов и проверена конфигурация nginx.
+Затем через команду `kubectl exec -it <nameOfPod> -- cat /etc/nginx/nginx.conf` было осуществлено подключение к терминалу одного из подов и проверена конфигурация nginx.
 
-Проверка поднятия Service выполнялась через команду 'kubectl describe service sf-webserver'
-
-
----
+Проверка поднятия Service выполнялась через команду `kubectl describe service sf-webserver`
 
 4. kind: Secret
 
 Далее для аутентификации в nginx были подготовлены данные для отправки в Pod-ы:
-
-
-`htpasswd -c myAuth user1`
-
-`cat myAuth | base64`
-
+```
+htpasswd -c myAuth user1
+cat myAuth | base64
+```
 
 Был создан файл secret.yaml с данными для передачи:
-
 ```
 apiVersion: v1
 kind: Secret
@@ -107,7 +101,6 @@ spec:
 ```
 
 В разделе ConfigMap изменено:
-
 ```
 data:
   nginx.conf: |
@@ -132,14 +125,10 @@ data:
 
 ---
 
-Применение новой кофигурации через команду 'kubectl apply -f .'
+Применение новой кофигурации через команду `kubectl apply -f .`
 
 Далее проверка через команды:
-
-
-`kubectl get pods`
-
-`kubectl exec -it <nameOfPod> -- curl sf-webserver`
-
-`kubectl exec -it <nameOfPod> -- curl -u user1:password1 sf-webserver`
-
+```
+kubectl get pods
+kubectl exec -it <nameOfPod> -- curl sf-webserver
+kubectl exec -it <nameOfPod> -- curl -u user1:password1 sf-webserver
