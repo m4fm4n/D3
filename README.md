@@ -51,7 +51,7 @@ data:
 
 `kubectl get pods`  #  отобразить Pod-ы 
 
-Затем через команду `kubectl exec -it <nameOfPod> -c <containerName> -- cat /etc/nginx/nginx.conf` было осуществлено подключение к терминалу одного из подов в контейнер и проверена конфигурация nginx.
+Затем через команду `kubectl exec -it <nameOfPod> -- cat /etc/nginx/nginx.conf` было осуществлено подключение к терминалу одного из подов в контейнер и проверена конфигурация nginx.
 
 Проверка поднятия Service выполнялась через команду `kubectl describe service sf-webserver`
 
