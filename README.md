@@ -11,12 +11,12 @@
 
 Выполнение:
 
-Был создан файл-манифест depoy-nginx.yaml со следующими свойствами:
+Был создан файл-манифест deploy-nginx.yaml со следующими свойствами:
 1. kind: Deployment
 - образ - nginx:1.21.1-alpine
 - имя - nginx-sf
 - количество реплик - 3
-- путь до файла конфигурации в Pod-е - /etc/nginx/nginx.conf
+- путь до файла конфигурации в контейнере - /etc/nginx/nginx.conf
 
 2. kind: Service
 - имя сервиса sf-webserver
@@ -51,7 +51,7 @@ data:
 
 `kubectl get pods`  #  отобразить Pod-ы 
 
-Затем через команду `kubectl exec -it <nameOfPod> -- cat /etc/nginx/nginx.conf` было осуществлено подключение к терминалу одного из подов и проверена конфигурация nginx.
+Затем через команду `kubectl exec -it <nameOfPod> -c <containerName> -- cat /etc/nginx/nginx.conf` было осуществлено подключение к терминалу одного из подов в контейнер и проверена конфигурация nginx.
 
 Проверка поднятия Service выполнялась через команду `kubectl describe service sf-webserver`
 
